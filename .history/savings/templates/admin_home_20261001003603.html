@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin area</h2>
+
+<h3>Payments waiting ({{ pending|length }})</h3>
+<p>Before confirming, check your MoMo history for the same reference and the right amount.</p>
+{% for p in pending %}
+<div class="card">
+  <p><strong>{{ p.member }}</strong> for {{ p.day }}</p>
+  <p>GH₵ {{ p.amount|floatformat:0 }} | Reference: <strong>{{ p.momo_reference }}</strong></p>
+  <p>Submitted {{ p.submitted_at|date:"D j M, H:i" }}</p>
+  <form method="post" action="{% url 'confirm_payment' p.pk %}" style="display:inline">
+    {% csrf_token %}<button type="submit">Confirm</button>
+  </form>
+  <form method="post" action="{% url 'reject_payment' p.pk %}" style="display:inline">
+    {% csrf_token %}<button type="submit">Reject</button>
+  </form>
+</div>
+{% empty %}
+  <p>Nothing waiting.</p>
+{% endfor %}
+
+<h3>Current round</h3>
+{% if current_round %}
+<div class="card">
+  <p>Round {{ current_round.number }}, receiver: <strong>{{ current_round.recipient }}</strong></p>
+  <p>Confirmed: GH₵ {{ collected|floatformat:0 }} of {{ target }}</p>
+  {% if payout_ready %}
+    <form method="post" action="{% url 'record_payout' current_round.pk %}">
+      {% csrf_token %}
+      <p>Send GH₵ {{ collected|floatformat:0 }} to {{ current_round.recipient }} by MoMo, then:</p>
+      <button type="submit">I've sent the payout</button>
+    </form>
+  {% else %}
+    <p>The payout button appears when the full amount is confirmed.</p>
+  {% endif %}
+</div>
+{% else %}
+  <p>No active round.</p>
+{% endif %}
+
+<h3>Upcoming days</h3>
+<table>
+  {% for d in upcoming_days %}
+  <tr>
+    <td>{{ d.date|date:"D j M" }}</td>
+    <td>{% if d.is_skipped %}Skipped{% else %}Contribution day{% endif %}</td>
+    <td>
+      <form method="post" action="{% url 'toggle_skip' d.pk %}">
+        {% csrf_token %}
+        <button type="submit">{% if d.is_skipped %}Restore{% else %}Skip{% endif %}</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>Recently confirmed</h3>
+<table>
+  {% for p in recent %}
+  <tr>
+    <td>{{ p.member }}</td>
+    <td>{{ p.day.date|date:"j M" }}</td>
+    <td>{{ p.confirmed_by.username }}, {{ p.confirmed_at|date:"j M H:i" }}</td>
+  </tr>
+  {% empty %}
+  <tr><td>None yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

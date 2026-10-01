@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f7a4d">
+  <title>Group Savings</title>
+  <style>
+    :root {
+      --green: #1f7a4d; --green-dark: #165c39; --bg: #f2f5f3; --card: #ffffff;
+      --text: #1d2b24; --muted: #66756d; --line: #e1e7e3; --red: #c0392b; --amber: #e08e0b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5;
+           font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    a { color: var(--green); }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 16px; }
+    .muted { color: var(--muted); }
+
+    /* Top bar */
+    .top { background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+    .nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding-top: 10px; padding-bottom: 10px; }
+    .brand { font-weight: 800; color: var(--green); text-decoration: none; font-size: 1.1rem; margin-right: auto; }
+    .nav a.link { color: var(--text); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+    .nav a.link:hover { color: var(--green); }
+    .nav form { margin: 0; }
+    .top button { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 6px 12px; font-size: 0.85rem; }
+    .top button:hover { background: var(--bg); }
+
+    /* Headings */
+    h2 { font-size: 1.5rem; margin: 8px 0 14px; }
+    h3 { font-size: 1.05rem; margin: 26px 0 10px; }
+
+    /* Cards and messages */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px;
+            margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .card p { margin: 6px 0; }
+    .card h3 { margin-top: 0; }
+    .msg { background: #e8f3ec; border: 1px solid #bfdccb; color: #14472b; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; }
+
+    /* Buttons */
+    button, .btn { display: inline-block; background: var(--green); color: #fff; border: none; border-radius: 10px;
+                   padding: 10px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+    button:hover, .btn:hover { background: var(--green-dark); }
+    form[action*="/reject/"] button { background: #fff; color: var(--red); border: 1px solid var(--red); }
+    form[action*="/reject/"] button:hover { background: #fdecea; }
+    form[action*="/skip/"] button { background: #fff; color: var(--green); border: 1px solid var(--green); padding: 6px 12px; }
+    form[action*="/skip/"] button:hover { background: #e8f3ec; }
+
+    /* Forms */
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #cdd6d0; border-radius: 10px; margin-bottom: 12px; background: #fff; }
+    input:focus { outline: 2px solid var(--green); border-color: var(--green); }
+    .error { color: var(--red); }
+
+    /* Progress bar */
+    .bar { background: #e3eae5; border-radius: 999px; height: 14px; overflow: hidden; margin-top: 10px; }
+    .bar-fill { background: linear-gradient(90deg, #2e9d63, #1f7a4d); height: 100%; border-radius: 999px; }
+
+    /* Lists and tables */
+    ul.plain { list-style: none; padding: 0; margin: 0; }
+    ul.plain li { display: flex; justify-content: space-between; background: var(--card); border: 1px solid var(--line);
+                  border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; }
+    .status { font-weight: 700; }
+    .status.confirmed { color: #1f8a52; }
+    .status.pending { color: var(--amber); }
+    .status.unpaid, .status.rejected { color: var(--red); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card);
+            border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: #f8faf8; }
+    td, th { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    tr:last-child td { border-bottom: none; }
+
+    /* Calendar */
+    .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 6px; }
+    .cal-head { text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; }
+    .weeklabel { font-size: 12px; color: var(--muted); margin: 10px 0 3px; }
+    .cell { display: block; min-height: 44px; padding: 6px 2px; border: 1px solid var(--line); border-radius: 8px;
+            text-align: center; font-size: 14px; color: var(--text); text-decoration: none; background: #fff; }
+    .cell small { display: block; font-size: 10px; opacity: .8; }
+    .cell.weekend, .cell.spare { background: #f0f2f1; color: #b2bab5; }
+    .cell.holiday { background: #d9dedb; color: #55605a; }
+    .cell.paid { background: #1f8a52; border-color: #1f8a52; color: #fff; }
+    .cell.pending { background: #f5a623; border-color: #f5a623; }
+    .cell.due { border: 2px solid var(--green); font-weight: 700; }
+    .cell.missed { background: #fde7e4; border-color: var(--red); color: #8f2a1f; }
+    .cell.today { outline: 2px solid #1a73e8; outline-offset: 1px; }
+    .legend span { display: inline-block; margin-right: 12px; font-size: 13px; }
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 4px; vertical-align: middle; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap nav">
+      <a class="brand" href="{% url 'dashboard' %}">Group Savings</a>
+      {% if user.is_authenticated %}
+        <a class="link" href="{% url 'dashboard' %}">Dashboard</a>
+        <a class="link" href="{% url 'calendar' %}">Calendar</a>
+        {% if user.is_staff %}
+          <a class="link" href="{% url 'admin_home' %}">Admin</a>
+        {% endif %}
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit">Log out</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+  <main class="wrap">
+    {% for message in messages %}
+      <div class="msg">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

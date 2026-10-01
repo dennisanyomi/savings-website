@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Hello, {{ user.first_name|default:user.username }}</h2>
+
+{% if member %}
+  <p>Your payout position: <strong>{{ member.payout_position }}</strong> of 10</p>
+{% else %}
+  <p>Your account is not linked to a group member yet.</p>
+{% endif %}
+
+{% if current_round %}
+<div class="card">
+  <h3>Round {{ current_round.number }} of 10</h3>
+  <p>Receiving this round: <strong>{{ current_round.recipient }}</strong></p>
+  <p>School day {{ days_done }} of {{ days_per_round }}</p>
+  <p>Collected: GH₵ {{ collected|floatformat:0 }} of {{ target }}</p>
+  <div class="bar"><div class="bar-fill" style="width: {{ percent }}%"></div></div>
+</div>
+{% else %}
+<div class="card"><p>No round is active yet.</p></div>
+{% endif %}
+
+<h3>Today's payments</h3>
+{% if member and today_status %}
+  <p><a class="btn" href="{% url 'submit_payment' %}">I've paid today</a></p>
+{% endif %}
+{% if today_status %}
+  <ul class="plain">
+    {% for row in today_status %}
+      <li>{{ row.member }}: <span class="status {{ row.status }}">{{ row.status|title }}</span></li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No contributions are due today (weekend, holiday, or the day isn't set up yet).</p>
+{% endif %}
+
+<h3>Payout order</h3>
+<table>
+  <tr><th>Round</th><th>Receives</th><th>Status</th></tr>
+  {% for r in all_rounds %}
+    <tr>
+      <td>{{ r.number }}</td>
+      <td>{{ r.recipient }}</td>
+      <td>{{ r.get_status_display }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="3">No rounds set up yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Payment for {{ day.date|date:"l j F Y" }}</h2>
+<p>1. Send <strong>GH₵ {{ amount }}</strong> by MoMo to the admin.</p>
+<p>2. Enter the transaction ID from your MoMo message below.</p>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.momo_reference.label_tag }}
+  {{ form.momo_reference }}
+  {% for error in form.momo_reference.errors %}
+    <p class="error">{{ error }}</p>
+  {% endfor %}
+  <button type="submit">I've paid</button>
+</form>
+{% endblock %}

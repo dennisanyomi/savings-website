@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Group Savings</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 16px; }
+    nav { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+    nav form { margin: 0; }
+    button, .btn { padding: 8px 14px; cursor: pointer; }
+    input { padding: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+    .error { color: #c00; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+    .bar { background: #eee; border-radius: 6px; height: 12px; overflow: hidden; }
+    .bar-fill { background: #2e8b57; height: 100%; }
+    .status.confirmed { color: #2e8b57; }
+    .status.pending { color: #d98200; }
+    .status.unpaid, .status.rejected { color: #c00; }
+    ul.plain { list-style: none; padding: 0; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { text-align: left; padding: 6px; border-bottom: 1px solid #eee; }
+
+    /* Calendar */
+    .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px; }
+    .cal-head { text-align: center; font-size: 12px; color: #666; }
+    .weeklabel { font-size: 12px; color: #666; margin: 8px 0 2px; }
+    .cell { display: block; box-sizing: border-box; min-height: 42px; padding: 6px 2px; border: 1px solid #eee;
+            border-radius: 6px; text-align: center; font-size: 14px; color: #000; text-decoration: none; background: #fff; }
+    .cell small { display: block; font-size: 10px; opacity: .8; }
+    .cell.weekend, .cell.spare { background: #f2f2f2; color: #aaa; }
+    .cell.holiday { background: #d9d9d9; color: #555; }
+    .cell.paid { background: #2e8b57; border-color: #2e8b57; color: #fff; }
+    .cell.pending { background: #f5a623; border-color: #f5a623; }
+    .cell.due { border: 2px solid #2e8b57; font-weight: bold; }
+    .cell.missed { background: #fde0e0; border-color: #c00; color: #900; }
+    .cell.today { outline: 2px solid #1a73e8; }
+    .legend span { display: inline-block; margin-right: 10px; font-size: 13px; }
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 4px; vertical-align: middle; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  {% if user.is_authenticated %}
+  <nav>
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <a href="{% url 'calendar' %}">Calendar</a>
+    {% if user.is_staff %}
+      <a href="{% url 'admin_home' %}">Admin</a>
+    {% endif %}
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit">Log out</button>
+    </form>
+  </nav>
+  {% endif %}
+  {% for message in messages %}
+    <div class="card">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My calendar</h2>
+
+{% if not member %}
+  <p>Your account is not linked to a group member, so no payments are shown.</p>
+{% else %}
+  <p>Confirmed: <strong>{{ paid }}</strong> of {{ total }} days</p>
+{% endif %}
+
+<div class="legend">
+  <span><i class="dot" style="background:#2e8b57"></i>Paid</span>
+  <span><i class="dot" style="background:#f5a623"></i>Waiting</span>
+  <span><i class="dot" style="background:#fde0e0;border-color:#c00"></i>Missed</span>
+  <span><i class="dot" style="background:#d9d9d9"></i>Holiday</span>
+</div>
+
+<div class="cal">
+  <div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div>
+  <div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div>
+  <div class="cal-head">Sun</div>
+</div>
+
+{% for week in weeks %}
+  <div class="weeklabel">Week of {{ week.start|date:"j M" }}</div>
+  <div class="cal">
+    {% for c in week.cells %}
+      {% if c.url %}
+        <a class="cell {{ c.state }}{% if c.today %} today{% endif %}" href="{{ c.url }}">
+          {{ c.date|date:"j" }}{% if c.number %}<small>#{{ c.number }}</small>{% endif %}
+        </a>
+      {% else %}
+        <div class="cell {{ c.state }}{% if c.today %} today{% endif %}">
+          {{ c.date|date:"j" }}{% if c.number %}<small>#{{ c.number }}</small>{% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% empty %}
+  <p>No days have been set up yet.</p>
+{% endfor %}
+
+<p>Tap a red day (or today's outlined day) to submit its payment.</p>
+{% endblock %}

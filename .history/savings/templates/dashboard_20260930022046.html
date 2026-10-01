@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Hello, {{ user.first_name|default:user.username }}</h2>
+{% if member %}
+  <p>Your payout position: <strong>{{ member.payout_position }}</strong> of 10</p>
+{% else %}
+  <p>Your account is not linked to a group member yet.</p>
+{% endif %}
+<p>The round tracker and payment form will appear here in the next stages.</p>
+{% endblock %}
